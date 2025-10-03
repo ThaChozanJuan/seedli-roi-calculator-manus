@@ -2,189 +2,181 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>What’s the return on investment?</title>
 <meta name="description" content="Seedli financial wellbeing ROI calculator" />
 <style>
   :root{
-    /* Tweak these to fine-tune the look */
-    --accent: #0E8A50;      /* Seedli / Manus-style green */
-    --accent-2: #0a6a3c;
-    --bg: #f7f9f8;
-    --ink: #0b1520;
-    --muted:#6b7280;
-    --border:#e5e7eb;
-    --card:#ffffff;
-    --kpi-bg:#f0faf4;
-    --kpi-border:#c6f6d5;
+    --accent:#0C7A49;       /* primary green (closer to Manus) */
+    --accent-2:#09633C;     /* hover/active green */
+    --bg:#F5F8F6;           /* page background */
+    --ink:#0B1520;          /* text */
+    --muted:#667085;        /* secondary text */
+    --border:#E6EBE9;       /* borders */
+    --card:#FFFFFF;         /* cards */
+    --kpi-bg:#ECF8F1;       /* results strip bg */
+    --kpi-border:#BEE5CF;   /* results tiles outline */
   }
   *{box-sizing:border-box}
   html,body{height:100%}
   body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-  .wrap{max-width:1080px;margin:28px auto;padding:20px}
-  .header{
-    display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:12px
-  }
-  h1{margin:0;font-size:28px;letter-spacing:.2px}
+  .wrap{max-width:1060px;margin:36px auto;padding:0 20px}
+  .page-title{margin:0 0 18px 0;font-size:30px;letter-spacing:.2px}
+
+  /* Cards & grid */
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 24px rgba(10,30,30,.06)}
+  .pad{padding:18px}
+  .half{grid-column:span 12}
+  @media(min-width:980px){ .half{grid-column:span 12} }
+
+  label{display:block;font-weight:600;margin:10px 0 6px}
+  input[type="number"]{width:100%;padding:12px 12px;border:1px solid var(--border);border-radius:10px;font-size:16px;background:#fff}
+  .row{display:flex;gap:12px}.row>*{flex:1}
+  .muted{color:var(--muted)}
+
+  /* Results strip */
+  .kpis{background:var(--kpi-bg);border:1px solid var(--kpi-border)}
+  .kpis-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .kpis h3{margin:0}
   .btn{
-    background:var(--accent);color:#fff;border:0;border-radius:10px;padding:12px 16px;
-    font-weight:600;cursor:pointer;transition:transform .04s ease, background .2s ease
+    background:var(--accent);color:#fff;border:0;border-radius:10px;padding:10px 14px;font-weight:600;
+    cursor:pointer;transition:background .15s ease, transform .04s ease
   }
   .btn:hover{background:var(--accent-2)}
   .btn:active{transform:translateY(1px)}
-  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
-  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px}
-  .half{grid-column:span 12}
-  @media(min-width:960px){ .half{grid-column:span 6} }
-  label{display:block;font-weight:600;margin:8px 0 6px}
-  input[type="number"], input[type="text"]{
-    width:100%;padding:12px;border:1px solid var(--border);border-radius:10px;font-size:16px
-  }
-  .row{display:flex;gap:12px;align-items:center}
-  .row>*{flex:1}
 
-  /* KPIs */
-  .kpis{grid-column:span 12;background:var(--kpi-bg);border:1px solid var(--kpi-border)}
   .out{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-  @media(max-width:800px){ .out{grid-template-columns:1fr 1fr} }
-  .kbox{position:relative;padding:14px 16px;border:1px dashed var(--kpi-border);border-radius:12px;background:#fff}
-  .kbox .tag{display:inline-block;background:var(--accent);color:#fff;font-size:12px;padding:4px 10px;border-radius:999px;margin-bottom:6px}
-  .kbox h2{margin:2px 0 0;font-size:24px}
-  small{color:var(--muted)}
-  .muted{color:var(--muted)}
+  @media(max-width:900px){ .out{grid-template-columns:1fr 1fr} }
+  @media(max-width:520px){ .out{grid-template-columns:1fr} }
 
-  /* Info bubble */
-  .info{
-    display:inline-flex;align-items:center;justify-content:center;
-    width:18px;height:18px;border-radius:999px;background:var(--accent);color:#fff;
-    font-size:12px;font-weight:700;margin-left:6px;cursor:pointer;user-select:none
+  .kbox{position:relative;padding:16px;border:1px dashed var(--kpi-border);border-radius:12px;background:#fff}
+  .tag{
+    display:inline-block;background:var(--accent);color:#fff;font-size:12px;font-weight:700;
+    padding:4px 10px;border-radius:999px;margin-bottom:6px
   }
+  .kbox h2{margin:2px 0 0;font-size:28px}
+  small{color:var(--muted)}
+
+  /* Info bubbles */
+  .info{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;
+    border-radius:999px;background:#0A5233;color:#fff;font-size:12px;font-weight:700;margin-left:6px;cursor:pointer}
   .tip{
-    position:absolute;z-index:5;top:42px;left:16px;right:16px;
-    background:#111827;color:#fff;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.35;
-    box-shadow:0 10px 30px rgba(0,0,0,.25);display:none
+    position:absolute;z-index:5;top:44px;left:16px;right:16px;background:#111827;color:#fff;border-radius:10px;
+    padding:10px 12px;font-size:13px;line-height:1.35;box-shadow:0 12px 32px rgba(0,0,0,.28);display:none
   }
   .kbox.open .tip{display:block}
-  .tip:before{
-    content:"";position:absolute;top:-8px;left:16px;border:8px solid transparent;border-bottom-color:#111827
-  }
+  .tip:before{content:"";position:absolute;top:-8px;left:16px;border:8px solid transparent;border-bottom-color:#111827}
 
-  /* Aside / how it works */
-  .aside{grid-column:span 12;background:#fbfbff}
-  .aside ol{margin:0 0 8px 18px}
-  .footnote{font-size:12px;color:var(--muted)}
+  /* How this works */
+  .aside{background:#FAFAFF}
 
-  /* Print to PDF */
+  /* Print */
   @media print{
     body{background:#fff}
-    .header .btn{display:none}
-    .card{border:0;padding:0}
-    .half{grid-column:span 6}
-    .aside{break-before:page}
+    .btn{display:none}
+    .card{border:0;box-shadow:none}
   }
 </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="header">
-      <h1>What’s the return on investment?</h1>
-      <button class="btn" id="pdfBtn">Download Results as PDF</button>
-    </div>
+    <h1 class="page-title">What’s the return on investment?</h1>
 
-    <div class="grid">
-      <!-- Inputs -->
-      <div class="card half">
-        <h3>Inputs</h3>
+    <!-- Inputs -->
+    <section class="card pad half" aria-labelledby="inputs">
+      <h3 id="inputs" style="margin:0 0 8px 0">Inputs</h3>
 
-        <label>Employees</label>
-        <input type="number" id="employees" value="200" min="1" step="1" />
+      <label>Employees</label>
+      <input type="number" id="employees" value="200" min="1" step="1" />
 
-        <div class="row">
-          <div>
-            <label>Avg loaded salary (incl. on-costs) $</label>
-            <input type="number" id="salary" value="110000" min="0" step="500" />
-          </div>
-          <div>
-            <label>Productivity loss from financial stress %</label>
-            <input type="number" id="lossPct" value="3.0" min="0" max="20" step="0.1" />
-          </div>
+      <div class="row">
+        <div>
+          <label>Avg loaded salary (incl. on-costs) $</label>
+          <input type="number" id="salary" value="110000" min="0" step="500" />
         </div>
-
-        <div class="row">
-          <div>
-            <label>Reduction with program %</label>
-            <input type="number" id="reductionPct" value="30" min="0" max="100" step="1" />
-          </div>
-          <div>
-            <label>Adoption / activation %</label>
-            <input type="number" id="adoptionPct" value="40" min="0" max="100" step="1" />
-          </div>
-        </div>
-
-        <div class="row">
-          <div>
-            <label>Price per employee per year $</label>
-            <input type="number" id="pricePerEmp" value="500" min="0" step="10" />
-          </div>
-          <div>
-            <label class="row" style="gap:8px;margin-top:28px">
-              <input type="checkbox" id="gstIncl" checked style="width:auto" />
-              <span class="muted">Price includes 10% GST</span>
-            </label>
-          </div>
-        </div>
-
-        <label>Fixed annual platform/licence fee $ (optional)</label>
-        <input type="number" id="fixedFee" value="0" min="0" step="100" />
-      </div>
-
-      <!-- Outputs -->
-      <div class="card half kpis">
-        <h3 style="margin-top:0">Results</h3>
-        <div class="out">
-          <div class="kbox" data-tip="Dollar value of productivity recovered.">
-            <div class="tag">Projected Total Annual Return <span class="info" data-role="info">i</span></div>
-            <h2 id="savings">$0</h2>
-            <small>Weighted by adoption</small>
-            <div class="tip">Recovered value from reduced financial stress.<br/>Formula: salary × loss% × reduction% × employees × adoption%.</div>
-          </div>
-
-          <div class="kbox" data-tip="Total annual program spend (ex-GST for comparison).">
-            <div class="tag">Program Cost <span class="info" data-role="info">i</span></div>
-            <h2 id="cost">$0</h2>
-            <small id="costNote">Ex-GST (adopters × price)</small>
-            <div class="tip">Cost uses ex-GST price for apples-to-apples ROI. If the checkbox is ticked, we back out GST: price ÷ 1.10.</div>
-          </div>
-
-          <div class="kbox" data-tip="Net benefit and ROI percentage.">
-            <div class="tag">Net ROI <span class="info" data-role="info">i</span></div>
-            <h2 id="net">$0</h2>
-            <small id="roiPct">0% ROI</small>
-            <div class="tip">Net = Annual Savings − Program Cost. ROI% = Net ÷ Cost.</div>
-          </div>
-
-          <div class="kbox" data-tip="Minimum activation rate needed to break even.">
-            <div class="tag">Break-even Adoption <span class="info" data-role="info">i</span></div>
-            <h2 id="breakeven">—</h2>
-            <small>% of staff required to break even</small>
-            <div class="tip">Break-even = priceUsed ÷ savingsPerEmp. Shows the activation % needed for savings to equal cost.</div>
-          </div>
+        <div>
+          <label>Productivity loss from financial stress %</label>
+          <input type="number" id="lossPct" value="3.0" min="0" max="20" step="0.1" />
         </div>
       </div>
 
-      <!-- How this works -->
-      <div class="card aside">
-        <h3>How this works</h3>
-        <ol>
-          <li><b>Stress cost/employee</b> = salary × loss%.</li>
-          <li><b>Savings/employee</b> = stress cost × reduction%.</li>
-          <li><b>Annual savings</b> = savings/employee × employees × adoption%.</li>
-          <li><b>Program cost</b> = price<small>(ex-GST)</small> × adopting + fixed fee.</li>
-          <li><b>Net ROI</b> = savings − cost; <b>ROI%</b> = net ÷ cost.</li>
-        </ol>
-        <div class="footnote">Tip: adjust defaults to your preferred assumptions. All figures in AUD.</div>
+      <div class="row">
+        <div>
+          <label>Reduction with program %</label>
+          <input type="number" id="reductionPct" value="30" min="0" max="100" step="1" />
+        </div>
+        <div>
+          <label>Adoption / activation %</label>
+          <input type="number" id="adoptionPct" value="40" min="0" max="100" step="1" />
+        </div>
       </div>
-    </div>
+
+      <div class="row">
+        <div>
+          <label>Price per employee per year $</label>
+          <input type="number" id="pricePerEmp" value="500" min="0" step="10" />
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:30px">
+          <input type="checkbox" id="gstIncl" checked style="width:auto" />
+          <span class="muted">Price includes 10% GST</span>
+        </div>
+      </div>
+
+      <label>Fixed annual platform/licence fee $ (optional)</label>
+      <input type="number" id="fixedFee" value="0" min="0" step="100" />
+    </section>
+
+    <!-- Results -->
+    <section class="card pad half kpis" aria-labelledby="results" style="margin-top:18px">
+      <div class="kpis-header">
+        <h3 id="results" style="margin:0">Results</h3>
+        <button class="btn" id="pdfBtn">Download Results as PDF</button>
+      </div>
+
+      <div class="out">
+        <div class="kbox">
+          <div class="tag">Projected Total Annual Return <span class="info">i</span></div>
+          <h2 id="savings">$0</h2>
+          <small>Weighted by adoption</small>
+          <div class="tip">Recovered value from reduced financial stress.<br/>Formula: salary × loss% × reduction% × employees × adoption%.</div>
+        </div>
+
+        <div class="kbox">
+          <div class="tag">Program Cost <span class="info">i</span></div>
+          <h2 id="cost">$0</h2>
+          <small id="costNote">Ex-GST (adopters × price)</small>
+          <div class="tip">Cost uses ex-GST for apples-to-apples ROI. If “includes GST” is ticked, we back GST out: price ÷ 1.10.</div>
+        </div>
+
+        <div class="kbox">
+          <div class="tag">Net ROI <span class="info">i</span></div>
+          <h2 id="net">$0</h2>
+          <small id="roiPct">0% ROI</small>
+          <div class="tip">Net = Annual Savings − Program Cost. ROI% = Net ÷ Cost.</div>
+        </div>
+
+        <div class="kbox">
+          <div class="tag">Break-even Adoption <span class="info">i</span></div>
+          <h2 id="breakeven">—</h2>
+          <small>% of staff required to break even</small>
+          <div class="tip">Break-even = priceUsed ÷ savingsPerEmp (as a % of total staff).</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How this works -->
+    <section class="card pad aside" style="margin-top:18px">
+      <h3 style="margin:0 0 8px 0">How this works</h3>
+      <ol style="margin:0 0 8px 18px">
+        <li><b>Stress cost/employee</b> = salary × loss%.</li>
+        <li><b>Savings/employee</b> = stress cost × reduction%.</li>
+        <li><b>Annual savings</b> = savings/employee × employees × adoption%.</li>
+        <li><b>Program cost</b> = price<small>(ex-GST)</small> × adopters + fixed fee.</li>
+        <li><b>Net ROI</b> = savings − cost; <b>ROI%</b> = net ÷ cost.</li>
+      </ol>
+      <div class="muted" style="font-size:12px">Adjust defaults to your preferred assumptions. All figures in AUD.</div>
+    </section>
   </div>
 
 <script>
@@ -202,8 +194,10 @@
     const gstIncl = $('gstIncl').checked;
     const fixed = +$('fixedFee').value || 0;
 
-    const priceUsed = gstIncl ? (price/1.10) : price;        // ex-GST for ROI
-    $('costNote').textContent = gstIncl ? 'Ex-GST (price ÷ 1.10 × adopters + fixed)' : 'Adopters × price + fixed';
+    const priceUsed = gstIncl ? (price/1.10) : price;
+    $('costNote').textContent = gstIncl
+      ? 'Ex-GST (price ÷ 1.10 × adopters + fixed)'
+      : 'Adopters × price + fixed';
 
     const stressPerEmp = salary * loss;
     const savePerEmp   = stressPerEmp * red;
@@ -222,13 +216,13 @@
     $('breakeven').textContent = isFinite(beAdopt) ? `${(beAdopt*100).toFixed(1)}%` : '—';
   }
 
-  // Recalc on all inputs
+  // inputs
   document.querySelectorAll('input').forEach(el=>{
     el.addEventListener('input', calc);
     el.addEventListener('change', calc);
   });
 
-  // Info bubbles (click to toggle; click outside to close)
+  // info bubbles
   function wireTips(){
     document.querySelectorAll('.kbox .info').forEach(btn=>{
       btn.addEventListener('click', (e)=>{
@@ -242,15 +236,10 @@
     });
   }
 
-  // Download PDF (native—works everywhere)
-  function downloadPDF(){
-    window.print(); // user selects "Save as PDF"
-  }
+  // pdf
+  document.getElementById('pdfBtn').addEventListener('click', ()=>window.print());
 
-  $('pdfBtn').addEventListener('click', downloadPDF);
-
-  wireTips();
-  calc();
+  wireTips(); calc();
 })();
 </script>
 </body>
