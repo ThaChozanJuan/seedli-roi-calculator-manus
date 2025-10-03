@@ -164,4 +164,94 @@
           </div>
 
           <div class="kbox" data-tip="Minimum activation rate needed to break even.">
-            <div class="tag">Break-even Adoption <span clas
+            <div class="tag">Break-even Adoption <span class="info" data-role="info">i</span></div>
+            <h2 id="breakeven">—</h2>
+            <small>% of staff required to break even</small>
+            <div class="tip">Break-even = priceUsed ÷ savingsPerEmp. Shows the activation % needed for savings to equal cost.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- How this works -->
+      <div class="card aside">
+        <h3>How this works</h3>
+        <ol>
+          <li><b>Stress cost/employee</b> = salary × loss%.</li>
+          <li><b>Savings/employee</b> = stress cost × reduction%.</li>
+          <li><b>Annual savings</b> = savings/employee × employees × adoption%.</li>
+          <li><b>Program cost</b> = price<small>(ex-GST)</small> × adopting + fixed fee.</li>
+          <li><b>Net ROI</b> = savings − cost; <b>ROI%</b> = net ÷ cost.</li>
+        </ol>
+        <div class="footnote">Tip: adjust defaults to your preferred assumptions. All figures in AUD.</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const $ = (id) => document.getElementById(id);
+  const fmtAUD = (n) => n.toLocaleString('en-AU',{style:'currency',currency:'AUD',maximumFractionDigits:0});
+
+  function calc(){
+    const emp = +$('employees').value || 0;
+    const salary = +$('salary').value || 0;
+    const loss = (+$('lossPct').value || 0)/100;
+    const red = (+$('reductionPct').value || 0)/100;
+    const adopt = (+$('adoptionPct').value || 0)/100;
+    const price = +$('pricePerEmp').value || 0;
+    const gstIncl = $('gstIncl').checked;
+    const fixed = +$('fixedFee').value || 0;
+
+    const priceUsed = gstIncl ? (price/1.10) : price;        // ex-GST for ROI
+    $('costNote').textContent = gstIncl ? 'Ex-GST (price ÷ 1.10 × adopters + fixed)' : 'Adopters × price + fixed';
+
+    const stressPerEmp = salary * loss;
+    const savePerEmp   = stressPerEmp * red;
+    const adopters     = emp * adopt;
+
+    const annualSavings = savePerEmp * adopters;
+    const programCost   = (priceUsed * adopters) + fixed;
+    const net           = annualSavings - programCost;
+    const roi           = programCost > 0 ? (net / programCost) : 0;
+    const beAdopt       = (priceUsed > 0 && savePerEmp > 0) ? (priceUsed / savePerEmp) : NaN;
+
+    $('savings').textContent   = fmtAUD(annualSavings);
+    $('cost').textContent      = fmtAUD(programCost);
+    $('net').textContent       = fmtAUD(net);
+    $('roiPct').textContent    = `${(roi*100).toFixed(0)}% ROI`;
+    $('breakeven').textContent = isFinite(beAdopt) ? `${(beAdopt*100).toFixed(1)}%` : '—';
+  }
+
+  // Recalc on all inputs
+  document.querySelectorAll('input').forEach(el=>{
+    el.addEventListener('input', calc);
+    el.addEventListener('change', calc);
+  });
+
+  // Info bubbles (click to toggle; click outside to close)
+  function wireTips(){
+    document.querySelectorAll('.kbox .info').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        const box = e.currentTarget.closest('.kbox');
+        document.querySelectorAll('.kbox').forEach(b=>{ if(b!==box) b.classList.remove('open'); });
+        box.classList.toggle('open');
+      });
+    });
+    document.addEventListener('click', (e)=>{
+      if(!e.target.closest('.kbox')) document.querySelectorAll('.kbox').forEach(b=>b.classList.remove('open'));
+    });
+  }
+
+  // Download PDF (native—works everywhere)
+  function downloadPDF(){
+    window.print(); // user selects "Save as PDF"
+  }
+
+  $('pdfBtn').addEventListener('click', downloadPDF);
+
+  wireTips();
+  calc();
+})();
+</script>
+</body>
+</html>
